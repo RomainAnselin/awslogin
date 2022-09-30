@@ -11,10 +11,20 @@ usage() {
 }
 
 awslogon() {
+	if [ ! -n $awsprofile ]; then
+		printf "\nUsing profile %s\n" $awsprofile
+	else
+		printf "\n!!! IMPORTANT !!!\nProfile not found. Set awsprofile variable or input below\n\n"
+		grep profile ~/.aws/config | sed -E 's/\[profile (.*)\]/\1/g'
+		printf "\n"
+		read -p "Select profile to use: " awsprofile
+		printf "\n"
+	fi
+
 	for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN ; do eval unset $var ; done
 	aws sso logout
-	aws sso login
-	aws sts get-caller-identity
+	aws sso login --profile $awsprofile
+	aws sts get-caller-identity --profile $awsprofile
 }
 
 awsvars() {
