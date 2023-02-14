@@ -6,7 +6,7 @@ usage() {
     echo "  -l   cleanup and logon"
     echo "  -s   set vars"
     echo "  -h   show this help"
-    exit 1
+    echo exiting... && sleep 10 && exit 1
   fi
 }
 
@@ -28,6 +28,8 @@ awslogon() {
 }
 
 awsvars() {
+   # local OPTIND=1
+   # echo OPTINDaws $OPTIND
 	for var in AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY AWS_SESSION_TOKEN AWS_SECURITY_TOKEN ; do eval unset $var ; done
 	awscreds=$( ls -t ~/.aws/cli/cache/*.json | head -1 )
 	export AWS_ACCESS_KEY_ID=`jq -r ".Credentials.AccessKeyId" $awscreds`
@@ -36,6 +38,11 @@ awsvars() {
 	echo "Token expiration: " $(jq -r ".Credentials.Expiration" $awscreds)
 }
 
+# SUPPORT-1365
+# https://stackoverflow.com/questions/42336595/in-bash-why-does-using-getopts-in-a-function-only-work-once
+# getopts when called with sourcing will increment the OPTIND variable, making the function not re-usable. As per above link
+
+local OPTIND=1
 while getopts "lsh" option; do
   case "${option}" in
     l) echo "AWS Logon"
@@ -50,3 +57,5 @@ while getopts "lsh" option; do
        usage ;;
   esac
 done
+local OPTIND=1
+# echo OPTINDex $OPTIND
